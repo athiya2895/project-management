@@ -14,10 +14,8 @@ class ProjectManagement {
         while(count != tasks.size()){
             for(Task t :  tasks) {
                 User userT = t.userRequired.get(0);
-               // System.out.println("Task: "+ t.name+" time:"+requiredDays);
 
                 if (t.taskRequired == null && !t.isComplete) {
-                    //System.out.println("user availble in: "+userT.availableIn+" for task: "+t.name);
                     int tempDays = t.daysToComplete + userT.availableIn;
                     for (Resource r:t.resourceRequired) {
                         tempDays += r.availableIn;
@@ -30,10 +28,8 @@ class ProjectManagement {
                     }
                     t.isComplete = true;
                     count++;
-                    //System.out.println("Task completion: " + t.name+" req days: "+requiredDays+ "c"+t.completedIn);
                 } else if(t.taskRequired != null) {
                     int flag = 0;
-                    //System.out.println("sub task!"+t.name);
                     for (Task s : t.taskRequired) {
                         if (s.isComplete) {
                             flag = 1;
@@ -41,7 +37,6 @@ class ProjectManagement {
                         }
                     }
                     if (flag == 1) {
-                        //System.out.println("sub task complete!"+t.name);
                         t.taskRequired = null; //TODO: find a better way to do this!
                     }
                 }
@@ -153,25 +148,19 @@ class Task{
 class Resource{
     int id;
     String name;
-    Boolean isAvailable;
     int availableIn;
     public Resource(int _id, String _name){
         id = _id;
         name = _name;
-        isAvailable = true;
         availableIn = 0;
     }
 }
 class User{
     int id;
     String name;
-    Boolean isAvailable;
     int availableIn;
-    int taskId; // to keep track of the task using it
     public User(int _id, String _name){
         id = _id;
         name = _name;
-        isAvailable = true;
-        taskId = 0;
     }
 }
