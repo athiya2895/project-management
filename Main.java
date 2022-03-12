@@ -11,7 +11,7 @@ class ProjectManagement {
         int requiredDays = 0;
         int count = 0;
         // calculating the total number of days to complete all tasks
-        while(count != tasks.size()){
+        /*while(count != tasks.size()){
             for(Task t :  tasks){
                 //System.out.println("task: "+t.name+", days left "+t.daysToComplete);
                 if(!t.isComplete) {
@@ -19,6 +19,8 @@ class ProjectManagement {
                     // make sure the task is not dependent on any other and user is available
                     if(t.taskRequired == null && t.daysToComplete != 0 &&
                             (userT.isAvailable || (!userT.isAvailable && userT.taskId == t.id) ) ){
+
+                        if(flag == 1){
                         userT.isAvailable = false;
                         userT.taskId = t.id;
                         requiredDays++;
@@ -44,7 +46,44 @@ class ProjectManagement {
                     }
                 }
             }
+        }*/
+        while(count != tasks.size()){
+            for(Task t :  tasks) {
+                User userT = t.userRequired.get(0);
+               // System.out.println("Task: "+ t.name+" time:"+requiredDays);
+
+                if (t.taskRequired == null && !t.isComplete) {
+                    //System.out.println("user availble in: "+userT.availableIn+" for task: "+t.name);
+                    int tempDays = t.daysToComplete + userT.availableIn;
+                    for (Resource r:t.resourceRequired) {
+                        tempDays += r.availableIn;
+                    }
+                    requiredDays += tempDays;
+                    t.completedIn += tempDays;
+                    userT.availableIn = requiredDays;
+                    for (Resource r:t.resourceRequired) {
+                        r.availableIn = requiredDays;
+                    }
+                    t.isComplete = true;
+                    count++;
+                    //System.out.println("Task completion: " + t.name+" req days: "+requiredDays+ "c"+t.completedIn);
+                } else if(t.taskRequired != null) {
+                    int flag = 0;
+                    //System.out.println("sub task!"+t.name);
+                    for (Task s : t.taskRequired) {
+                        if (s.isComplete) {
+                            flag = 1;
+                            t.completedIn += s.completedIn;
+                        }
+                    }
+                    if (flag == 1) {
+                        //System.out.println("sub task complete!"+t.name);
+                        t.taskRequired = null; //TODO: find a better way to do this!
+                    }
+                }
+            }
         }
+
         System.out.println("Number of days required = "+ requiredDays);
         LocalDate t = LocalDate.now();
         long workingDays = calcWeekDays(t,deadline);
@@ -79,6 +118,7 @@ class ProjectManagement {
         User u4 = new User(204, "Bob");
         User u5 = new User(205, "Cady");
 
+        //single user dependency
         Task api = new Task(1, "make API",
                 10, null,
                 new ArrayList<User>(){{add(u1);}},
@@ -92,22 +132,22 @@ class ProjectManagement {
         Task ui = new Task(3, "UI design",
                 15, new ArrayList<Task>(){{add(db);}},
                 new ArrayList<User>(){{add(u3);}},
-                new ArrayList<Resource>(){{add(r1);add(r3);}});
+                new ArrayList<Resource>(){{add(r3);}});
 
         Task auth = new Task(4, "Authentication",
                 7, new ArrayList<Task>(){{add(ui);}},
                 new ArrayList<User>(){{add(u4);}},
-                new ArrayList<Resource>(){{add(r1);add(r4);}});
+                new ArrayList<Resource>(){{add(r4);}});
 
         Task testing = new Task(5, "testing",
                 12, new ArrayList<Task>(){{add(api);}},
                 new ArrayList<User>(){{add(u1);}},
-                new ArrayList<Resource>(){{add(r1);}});
+                new ArrayList<Resource>(){{add(r3);}});
 
         Task logic = new Task(6, "Logic layer",
                 10,null,
-                new ArrayList<User>(){{add(u2);}},
-                new ArrayList<Resource>(){{add(r1);add(r2);}});
+                new ArrayList<User>(){{add(u1);}},
+                new ArrayList<Resource>(){{add(r2);}});
 
         // considering all tasks indeoendent for first iteration
         tasks.add(api);
@@ -117,7 +157,7 @@ class ProjectManagement {
         tasks.add(testing);
         tasks.add(logic);
 
-        String date = "2022-07-16";
+        String date = "2023-07-16";
 
         LocalDate dueDate = LocalDate.parse(date);
         System.out.println("will the project be completed before deadline? = " + (isOnTime(dueDate,tasks)?"Yes":"No"));
@@ -131,6 +171,7 @@ class Task{
     ArrayList<User> userRequired;
     int daysToComplete;
     Boolean isComplete;
+    int completedIn;
     public Task(int _id, String _name, int _daysToComplete,
                 ArrayList<Task> _taskRequired,
                 ArrayList<User> _userRequired,
@@ -142,22 +183,26 @@ class Task{
         userRequired = _userRequired;
         resourceRequired = _resourceRequired;
         isComplete = false;
+        completedIn = 0;
     }
 }
 class Resource{
     int id;
     String name;
     Boolean isAvailable;
+    int availableIn;
     public Resource(int _id, String _name){
         id = _id;
         name = _name;
         isAvailable = true;
+        availableIn = 0;
     }
 }
 class User{
     int id;
     String name;
     Boolean isAvailable;
+    int availableIn;
     int taskId; // to keep track of the task using it
     public User(int _id, String _name){
         id = _id;
