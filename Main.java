@@ -12,21 +12,34 @@ class ProjectManagement {
         int count = 0;
         // calculating the total number of days to complete all tasks
         while(count != tasks.size()){
-            System.out.println(count);
             for(Task t :  tasks){
+                //System.out.println("task: "+t.name+", days left "+t.daysToComplete);
                 if(!t.isComplete) {
-                    if(t.taskRequired == null){
-                        requiredDays += t.daysToComplete;
-                        count++;
-                        t.isComplete = true;
+                    User userT = t.userRequired.get(0);
+                    // make sure the task is not dependent on any other and user is available
+                    if(t.taskRequired == null && t.daysToComplete != 0 &&
+                            (userT.isAvailable || (!userT.isAvailable && userT.taskId == t.id) ) ){
+                        userT.isAvailable = false;
+                        userT.taskId = t.id;
+                        requiredDays++;
+                        if (--t.daysToComplete == 0) {
+                            //System.out.println("Task completion: " + t.name);
+                            userT.isAvailable = true;
+                            count++;
+                            t.isComplete = true;
+                        }
                     }
-                    else{
+                    else if(t.taskRequired != null){
+                        int flag = 0;
+                        //System.out.println("sub task!"+t.name);
                         for (Task s: t.taskRequired){
                             if(s.isComplete){
-                                requiredDays += t.daysToComplete + s.daysToComplete;
-                                count++;
-                                t.isComplete = true;
+                                flag = 1;
                             }
+                        }
+                        if(flag == 1){
+                            //System.out.println("sub task complete!"+t.name);
+                            t.taskRequired = null; //TODO: find a better way to do this!
                         }
                     }
                 }
@@ -74,17 +87,17 @@ class ProjectManagement {
         Task db = new Task(2, "db setup",
                 5, null,
                 new ArrayList<User>(){{add(u2);}},
-                new ArrayList<Resource>(){{add(r2);}});
+                new ArrayList<Resource>(){{add(r1);add(r2);}});
 
         Task ui = new Task(3, "UI design",
                 15, new ArrayList<Task>(){{add(db);}},
                 new ArrayList<User>(){{add(u3);}},
-                new ArrayList<Resource>(){{add(r3);}});
+                new ArrayList<Resource>(){{add(r1);add(r3);}});
 
         Task auth = new Task(4, "Authentication",
                 7, new ArrayList<Task>(){{add(ui);}},
                 new ArrayList<User>(){{add(u4);}},
-                new ArrayList<Resource>(){{add(r4);}});
+                new ArrayList<Resource>(){{add(r1);add(r4);}});
 
         Task testing = new Task(5, "testing",
                 12, new ArrayList<Task>(){{add(api);}},
@@ -94,7 +107,7 @@ class ProjectManagement {
         Task logic = new Task(6, "Logic layer",
                 10,null,
                 new ArrayList<User>(){{add(u2);}},
-                new ArrayList<Resource>(){{add(r2);}});
+                new ArrayList<Resource>(){{add(r1);add(r2);}});
 
         // considering all tasks indeoendent for first iteration
         tasks.add(api);
@@ -107,26 +120,21 @@ class ProjectManagement {
         String date = "2022-07-16";
 
         LocalDate dueDate = LocalDate.parse(date);
-        System.out.println("will the project be completed before deadline? = " + isOnTime(dueDate,tasks));
-
-        /*SimpleDateFormat ft = new SimpleDateFormat ("yyyy-MM-dd");
-        try {
-             isOnTime(ft.parse("2022-03-23"),tasks);
-        }
-        catch (ParseException e) {
-             System.out.println("Unparseable using " + ft);
-        }*/
+        System.out.println("will the project be completed before deadline? = " + (isOnTime(dueDate,tasks)?"Yes":"No"));
     }
 }
 class Task{
     int id;
     String name;
-    List<Task> taskRequired;
-    List<Resource> resourceRequired;
-    List<User> userRequired;
+    ArrayList<Task> taskRequired;
+    ArrayList<Resource> resourceRequired;
+    ArrayList<User> userRequired;
     int daysToComplete;
     Boolean isComplete;
-    public Task(int _id, String _name, int _daysToComplete, List<Task> _taskRequired,List<User> _userRequired,List<Resource> _resourceRequired){
+    public Task(int _id, String _name, int _daysToComplete,
+                ArrayList<Task> _taskRequired,
+                ArrayList<User> _userRequired,
+                ArrayList<Resource> _resourceRequired){
         id = _id;
         name = _name;
         daysToComplete = _daysToComplete;
@@ -150,9 +158,11 @@ class User{
     int id;
     String name;
     Boolean isAvailable;
+    int taskId; // to keep track of the task using it
     public User(int _id, String _name){
         id = _id;
         name = _name;
         isAvailable = true;
+        taskId = 0;
     }
 }
