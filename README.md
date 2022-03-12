@@ -23,13 +23,16 @@ Includes fields:
 2.  Name
 3.  An int value indicating number waiting of days before it is available  
 ### ProjectManagement
-Includes the Main method for initializing objects, a method to calculate number of working days starting from today to a given date and a method to calculate the number of days required to complete the project by following the schedule.
+Includes the 
+1.  Main method for initializing objects, 
+2.  A method to calculate number of working days starting from today to a given date and 
+3.  A method to calculate the number of days required to complete the project by following the schedule.
 
 ## Solution Explained
-1.  The current solution will be able to decide which task requires how much time based 
-  1.  on the sub tasks that it depends on, 
-  2.  the users that work on it and 
-  3.  the resources it requires.
+1.  The current solution will be able to decide which task requires how much time based on: 
+      -  on the sub tasks that it depends on, 
+      -  the users that work on it and 
+      -  the resources it requires.
 2.  The formula for calculating the total time taken is:
       > Time for single Task = time for task completed + user waiting time + resources waiting time  
       > Update user waiting time and resource waiting time after each task completion    
