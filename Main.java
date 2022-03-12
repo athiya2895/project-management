@@ -11,42 +11,6 @@ class ProjectManagement {
         int requiredDays = 0;
         int count = 0;
         // calculating the total number of days to complete all tasks
-        /*while(count != tasks.size()){
-            for(Task t :  tasks){
-                //System.out.println("task: "+t.name+", days left "+t.daysToComplete);
-                if(!t.isComplete) {
-                    User userT = t.userRequired.get(0);
-                    // make sure the task is not dependent on any other and user is available
-                    if(t.taskRequired == null && t.daysToComplete != 0 &&
-                            (userT.isAvailable || (!userT.isAvailable && userT.taskId == t.id) ) ){
-
-                        if(flag == 1){
-                        userT.isAvailable = false;
-                        userT.taskId = t.id;
-                        requiredDays++;
-                        if (--t.daysToComplete == 0) {
-                            //System.out.println("Task completion: " + t.name);
-                            userT.isAvailable = true;
-                            count++;
-                            t.isComplete = true;
-                        }
-                    }
-                    else if(t.taskRequired != null){
-                        int flag = 0;
-                        //System.out.println("sub task!"+t.name);
-                        for (Task s: t.taskRequired){
-                            if(s.isComplete){
-                                flag = 1;
-                            }
-                        }
-                        if(flag == 1){
-                            //System.out.println("sub task complete!"+t.name);
-                            t.taskRequired = null; //TODO: find a better way to do this!
-                        }
-                    }
-                }
-            }
-        }*/
         while(count != tasks.size()){
             for(Task t :  tasks) {
                 User userT = t.userRequired.get(0);
